@@ -24,6 +24,10 @@ export class UsersService {
   async findById(id: number) {
     return this.usersRepo.findOne({ where: { id } });
   }
+  async findAll() {
+  return this.usersRepo.find();
+}
+
 
   async register(dto: RegisterDto) {
     const { companyName, employeeNumber, password } = dto;
@@ -67,18 +71,21 @@ export class UsersService {
     const { passwordHash: _, ...safeUser } = saved;
     return safeUser;
   }
-async clearRefreshToken(userId: number) {
+async updateRefreshToken(userId: number, refreshTokenHash: string | null) {
   await this.usersRepo
     .createQueryBuilder()
-    .update()
-    .set({ refreshTokenHash: null })
+    .update(UserEntity)
+    .set({ refreshTokenHash })
     .where("id = :id", { id: userId })
     .execute();
 }
 
-
+async clearRefreshToken(userId: number) {
+  await this.usersRepo
+    .createQueryBuilder()
+    .update(UserEntity)
+    .set({ refreshTokenHash: null })
+    .where("id = :id", { id: userId })
+    .execute();
 }
-
-
-
 }

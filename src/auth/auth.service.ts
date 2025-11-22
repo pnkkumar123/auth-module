@@ -33,6 +33,7 @@ export class AuthService {
     sub: user.id,
     companyName: user.companyName,
     employeeNumber: user.employeeNumber,
+    role: user.role,
   };
 
   // ✅ generate access token (15m or 1h)
@@ -72,7 +73,7 @@ async refresh(token: string) {
 
 async logout(userId: number) {
   // refresh token ko null kar do → dobara use nahi ho payega
-await this.usersService.updateRefreshToken(userId, undefined);
+await this.usersService.updateRefreshToken(userId, null);
 
   return { message: 'Logged out successfully' };
 }

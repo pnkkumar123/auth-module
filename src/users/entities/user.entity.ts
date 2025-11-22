@@ -17,8 +17,8 @@ export class UserEntity {
   @Column({ length: 255 })
   passwordHash: string;
 
-@Column({length: 255, nullable: true })
-  refreshTokenHash?: string ;
+@Column({ type: 'varchar', length: 255, nullable: true })
+  refreshTokenHash: string | null;
   @Column({ default: true })
   isActive: boolean;
 
