@@ -86,7 +86,6 @@ export class SeederService {
         companyName: 'SYSTEM',
         employeeNumber: '0001',
         fullName: 'System Administrator',
-        age: 30,
       });
       
       const savedEmployee = await this.employeesRepo.save(employee);

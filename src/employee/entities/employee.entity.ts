@@ -14,6 +14,5 @@ export class EmployeeEntity {
   @Column()
   fullName: string;
 
-  @Column({ nullable: true })
-  age: number;
+ 
 }

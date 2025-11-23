@@ -30,7 +30,7 @@ export class ModuleAccessGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      throw new ForbiddenException('No user in request');
+      throw new ForbiddenException('Access denied');
     }
 
     const allowed = await this.umrService.hasPermission(
@@ -40,7 +40,7 @@ export class ModuleAccessGuard implements CanActivate {
     );
 
     if (!allowed) {
-      throw new ForbiddenException('Access denied for this module/action');
+      throw new ForbiddenException('Access denied');
     }
 
     return true;
