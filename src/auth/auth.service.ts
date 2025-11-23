@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -53,6 +53,7 @@ export class AuthService {
   return {
     accessToken,
     refreshToken,
+    userId: user.id,
   };
 }
 async refresh(token: string) {
@@ -76,6 +77,43 @@ async logout(userId: number) {
 await this.usersService.updateRefreshToken(userId, null);
 
   return { message: 'Logged out successfully' };
+}
+
+async forgotPassword(companyName: string, employeeNumber: string, email: string) {
+  // Find user by company and employee number
+  const user = await this.usersService.findByCompanyAndEmployee(companyName, employeeNumber);
+  
+  if (!user) {
+    throw new NotFoundException('User not found with provided credentials');
+  }
+
+  // Generate reset token
+  const resetToken = await this.usersService.generatePasswordResetToken(user.id);
+  
+  // In a real application, you would send an email here
+  // For now, we'll return the reset token (in production, this should be sent via email)
+  return {
+    message: 'Password reset instructions have been sent to your email',
+    resetToken, // This is for testing purposes - remove in production
+    resetLink: `/auth/reset-password?token=${resetToken}&company=${companyName}&employee=${employeeNumber}`
+  };
+}
+
+async resetPassword(resetToken: string, companyName: string, employeeNumber: string, newPassword: string) {
+  // Validate the reset token
+  const user = await this.usersService.validateResetToken(resetToken, companyName, employeeNumber);
+  
+  if (!user) {
+    throw new BadRequestException('Invalid or expired reset token');
+  }
+
+  // Reset the password
+  await this.usersService.resetPassword(user.id, newPassword);
+  
+  // Clear any existing refresh tokens for security
+  await this.usersService.clearRefreshToken(user.id);
+
+  return { message: 'Password has been reset successfully' };
 }
 
 

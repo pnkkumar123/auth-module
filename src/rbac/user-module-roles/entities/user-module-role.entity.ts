@@ -10,7 +10,7 @@ import { BusinessModuleEntity } from '../../modules/entities/business-module.ent
 import { RoleEntity } from '../../roles/entities/role.entity';
 
 @Entity({ name: 'user_module_roles' })
-@Unique('UQ_user_module', ['user', 'module'])
+@Unique('UQ_user_module_role', ['user', 'module', 'role'])
 export class UserModuleRoleEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { QueryFailedError } from 'typeorm';
 import { RoleEntity } from './entities/role.entity';
 
 @Injectable()
@@ -11,8 +12,20 @@ export class RolesService {
   ) {}
 
   async create(createRoleDto: { name: string; description?: string }): Promise<RoleEntity> {
-    const role = this.rolesRepo.create(createRoleDto);
-    return this.rolesRepo.save(role);
+    try {
+      const role = this.rolesRepo.create(createRoleDto);
+      return await this.rolesRepo.save(role);
+    } catch (error) {
+      // Handle duplicate role name constraint violation
+      if (error instanceof QueryFailedError) {
+        const sqlError = error as any;
+        if (sqlError.number === 2627 || sqlError.code === '23505' || sqlError.errno === 1062) {
+          // SQL Server: 2627, PostgreSQL: 23505, MySQL: 1062
+          throw new ConflictException(`Role with name '${createRoleDto.name}' already exists`);
+        }
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<RoleEntity[]> {
@@ -29,13 +42,36 @@ export class RolesService {
 
   async update(id: number, updateRoleDto: { name?: string; description?: string }): Promise<RoleEntity> {
     const role = await this.findOne(id);
-    Object.assign(role, updateRoleDto);
-    return this.rolesRepo.save(role);
+    try {
+      Object.assign(role, updateRoleDto);
+      return await this.rolesRepo.save(role);
+    } catch (error) {
+      // Handle duplicate role name constraint violation
+      if (error instanceof QueryFailedError) {
+        const sqlError = error as any;
+        if (sqlError.number === 2627 || sqlError.code === '23505' || sqlError.errno === 1062) {
+          throw new ConflictException(`Role with name '${updateRoleDto.name}' already exists`);
+        }
+      }
+      throw error;
+    }
   }
 
   async remove(id: number): Promise<void> {
     const role = await this.findOne(id);
-    await this.rolesRepo.remove(role);
+    try {
+      await this.rolesRepo.remove(role);
+    } catch (error) {
+      // Handle foreign key constraint violation
+      if (error instanceof QueryFailedError) {
+        const sqlError = error as any;
+        if (sqlError.number === 547 || sqlError.code === '23503' || sqlError.errno === 1451) {
+          // SQL Server: 547, PostgreSQL: 23503, MySQL: 1451
+          throw new ConflictException(`Cannot delete role with ID ${id} because it has existing user assignments. Please remove all user assignments for this role first.`);
+        }
+      }
+      throw error;
+    }
   }
 
   async findByName(name: string): Promise<RoleEntity | null> {
