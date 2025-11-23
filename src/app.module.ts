@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -11,6 +11,8 @@ import { EmployeeModule } from './employee/employee.module';
 import { ModulesModule } from './rbac/modules/modules.module';
 import { RolesModule } from './rbac/roles/roles.module';
 import { UserModuleRolesModule } from './rbac/user-module-roles/user-module-roles.module';
+import { DatabaseModule } from './database/database.module';
+import { SeederService } from './database/seeder.service';
 
 @Module({
   imports: [
@@ -41,9 +43,16 @@ import { UserModuleRolesModule } from './rbac/user-module-roles/user-module-role
     ModulesModule,
     RolesModule,
     UserModuleRolesModule,
+    DatabaseModule,
   ],
 
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly seederService: SeederService) {}
+
+  async onModuleInit() {
+    await this.seederService.seed();
+  }
+}

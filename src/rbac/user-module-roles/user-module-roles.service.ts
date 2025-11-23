@@ -80,4 +80,18 @@ export class UserModuleRolesService {
         return false;
     }
   }
+
+  async getRolesForUser(userId: number): Promise<string[]> {
+    const userModuleRoles = await this.umrRepo
+      .createQueryBuilder('umr')
+      .leftJoinAndSelect('umr.role', 'role')
+      .leftJoinAndSelect('umr.module', 'module')
+      .where('umr.user.id = :userId', { userId })
+      .getMany();
+
+    // Return unique role names across all modules
+    const roleNames = userModuleRoles.map(umr => umr.role.name);
+    return [...new Set(roleNames)];
+  }
+
 }
