@@ -48,6 +48,7 @@ export class ModulesController {
   })
   @ApiResponse({ status: 403, description: 'Access denied - insufficient permissions' })
   @ApiResponse({ status: 400, description: 'Invalid request data' })
+  @ApiResponse({ status: 409, description: 'Module with this code already exists' })
   @ApiBearerAuth('JWT-auth')
   @ApiBody({
     schema: {
@@ -182,6 +183,7 @@ export class ModulesController {
   @ApiResponse({ status: 200, description: 'Module deleted successfully' })
   @ApiResponse({ status: 404, description: 'Module not found' })
   @ApiResponse({ status: 403, description: 'Access denied - insufficient permissions' })
+  @ApiResponse({ status: 409, description: 'Cannot delete module with existing role assignments' })
   @ApiBearerAuth('JWT-auth')
   @ApiParam({ name: 'id', description: 'Module ID', example: 1 })
   @Delete(':id')

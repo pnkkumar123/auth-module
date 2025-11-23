@@ -33,13 +33,20 @@ export class UsersService {
     const { companyName, employeeNumber, password } = dto;
 
     // 1️⃣ Check employee exists in "pe" table using correct column names
-    const employee = await this.employeeService.findByEmpresaAndNfunc(
-      companyName,
-      employeeNumber,
-    );
+    // TEMPORARY BYPASS for local testing only
+    if (process.env.SKIP_PE_VALIDATION === 'true') {
+      // Skip pe table validation for local testing
+      console.log('⚠️  SKIP_PE_VALIDATION is active - bypassing pe table validation');
+    } else {
+      // PRODUCTION: Real validation against pe table
+      const employee = await this.employeeService.findByEmpresaAndNfunc(
+        companyName,
+        employeeNumber,
+      );
 
-    if (!employee) {
-      throw new BadRequestException('Employee not found in company records.');
+      if (!employee) {
+        throw new BadRequestException('Employee not found in company records.');
+      }
     }
 
     // 2️⃣ Check if user already registered

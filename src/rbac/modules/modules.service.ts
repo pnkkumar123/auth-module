@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { QueryFailedError } from 'typeorm';
 import { BusinessModuleEntity } from './entities/business-module.entity';
 
 @Injectable()
@@ -11,8 +12,20 @@ export class ModulesService {
   ) {}
 
   async create(createModuleDto: { code: string; name: string; description?: string }): Promise<BusinessModuleEntity> {
-    const module = this.modulesRepo.create(createModuleDto);
-    return this.modulesRepo.save(module);
+    try {
+      const module = this.modulesRepo.create(createModuleDto);
+      return await this.modulesRepo.save(module);
+    } catch (error) {
+      // Handle duplicate module code constraint violation
+      if (error instanceof QueryFailedError) {
+        const sqlError = error as any;
+        if (sqlError.number === 2627 || sqlError.code === '23505' || sqlError.errno === 1062) {
+          // SQL Server: 2627, PostgreSQL: 23505, MySQL: 1062
+          throw new ConflictException(`Module with code '${createModuleDto.code}' already exists`);
+        }
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<BusinessModuleEntity[]> {
@@ -39,6 +52,18 @@ export class ModulesService {
 
   async remove(id: number): Promise<void> {
     const module = await this.findOne(id);
-    await this.modulesRepo.remove(module);
+    try {
+      await this.modulesRepo.remove(module);
+    } catch (error) {
+      // Handle foreign key constraint violation
+      if (error instanceof QueryFailedError) {
+        const sqlError = error as any;
+        if (sqlError.number === 547 || sqlError.code === '23503' || sqlError.errno === 1451) {
+          // SQL Server: 547, PostgreSQL: 23503, MySQL: 1451
+          throw new ConflictException(`Cannot delete module with ID ${id} because it has existing role assignments. Please remove all role assignments for this module first.`);
+        }
+      }
+      throw error;
+    }
   }
 }

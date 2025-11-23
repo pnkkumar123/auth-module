@@ -19,6 +19,7 @@ import { LocalAuthGuard } from '../common/guards/local-auth.guard';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { LoginDto } from './dto/login.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -29,6 +30,7 @@ export class AuthController {
     summary: 'User Login',
     description: 'Authenticate user with company name, employee number, and password. Returns JWT access and refresh tokens.'
   })
+  @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: 201,
     description: 'Login successful',
@@ -46,8 +48,10 @@ export class AuthController {
   // ✅ LOGIN
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Body() loginDto: LoginDto) {
+    // Use LocalAuthGuard which will call validateUser, then we login the validated user
+    const user = await this.authService.validateUser(loginDto.employeeNumber, loginDto.password);
+    return this.authService.login(user);
   }
 
   @ApiOperation({

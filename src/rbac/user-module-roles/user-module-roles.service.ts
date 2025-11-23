@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { QueryFailedError } from 'typeorm';
 import { UserModuleRoleEntity } from './entities/user-module-role.entity';
 import { AssignUserModuleRoleDto } from './dto/assign-user-module-role.dto';
 import { UserEntity } from '../../users/entities/user.entity';
@@ -30,6 +31,19 @@ export class UserModuleRolesService {
     const role = await this.rolesRepo.findOne({ where: { id: dto.roleId } });
     if (!role) throw new NotFoundException('Role not found');
 
+    // Check if user-module-role assignment already exists
+    const existingUmr = await this.umrRepo.findOne({
+      where: {
+        user: { id: user.id },
+        module: { id: module.id },
+        role: { id: role.id }
+      },
+    });
+
+    if (existingUmr) {
+      throw new ConflictException(`User-module-role assignment already exists for user ${dto.userId}, module ${dto.moduleId}, and role ${dto.roleId}`);
+    }
+
     let umr = await this.umrRepo.findOne({
       where: { user: { id: user.id }, module: { id: module.id } },
     });
@@ -41,6 +55,7 @@ export class UserModuleRolesService {
         role,
       });
     } else {
+      // If user-module exists but with different role, update the role
       umr.role = role;
     }
 
@@ -49,7 +64,18 @@ export class UserModuleRolesService {
     umr.canUpdate = dto.canUpdate ?? false;
     umr.canDelete = dto.canDelete ?? false;
 
-    return this.umrRepo.save(umr);
+    try {
+      return await this.umrRepo.save(umr);
+    } catch (error) {
+      // Handle unique constraint violation for user-module-role combination
+      if (error instanceof QueryFailedError) {
+        const sqlError = error as any;
+        if (sqlError.number === 2627 || sqlError.code === '23505' || sqlError.errno === 1062) {
+          throw new ConflictException(`User-module-role assignment already exists for user ${dto.userId}, module ${dto.moduleId}, and role ${dto.roleId}`);
+        }
+      }
+      throw error;
+    }
   }
 
   async hasPermission(
