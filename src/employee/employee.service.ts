@@ -13,8 +13,17 @@ export class EmployeeService {
   async findByEmployee(employeeNumber: string, companyName: string) {
     return this.employeeRepo.findOne({
       where: {
-        employeeNumber,
-        companyName,
+        employeeNumber: employeeNumber,
+        companyName: companyName,
+      },
+    });
+  }
+
+  async findByEmpresaAndNfunc(empresa: string, nfunc: string) {
+    return this.employeeRepo.findOne({
+      where: {
+        companyName: empresa,
+        employeeNumber: nfunc,
       },
     });
   }

@@ -19,6 +19,13 @@ export class UserEntity {
 
 @Column({ type: 'varchar', length: 255, nullable: true })
   refreshTokenHash: string | null;
+  
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  resetPasswordToken: string | null;
+  
+  @Column({ type: 'datetime', nullable: true })
+  resetPasswordExpires: Date | null;
+
   @Column({ default: true })
   isActive: boolean;
 
