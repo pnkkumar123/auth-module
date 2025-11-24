@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException, NotFoundException, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -8,6 +9,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   // Called by LocalStrategy
@@ -36,14 +38,14 @@ export class AuthService {
     role: user.role,
   };
 
-  // ✅ generate access token (15m or 1h)
+  // ✅ generate access token (configurable via environment)
   const accessToken = this.jwtService.sign(payload, {
-    expiresIn: '15m',
+    expiresIn: this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRES_IN', '15m') as any,
   });
 
-  // ✅ generate refresh token (7 days)
+  // ✅ generate refresh token (configurable via environment)
   const refreshToken = this.jwtService.sign(payload, {
-    expiresIn: '7d',
+    expiresIn: this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d') as any,
   });
 
   // ✅ hash and store refresh token in DB
