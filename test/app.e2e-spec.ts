@@ -2,7 +2,7 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { TestSetup, TestTokens } from './test-setup';
 
-describe('AUTH + RBAC E2E ✅', () => {
+describe('AUTH + RBAC E2E ', () => {
   let app: INestApplication;
   let testSetup: TestSetup;
   let tokens: TestTokens;
@@ -17,8 +17,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     await testSetup.teardown();
   });
 
-  // ✅ Basic Authentication Tests
-  it('✅ Admin login should return access token', async () => {
+  //   Basic Authentication Tests
+  it(' Admin login should return access token', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -31,7 +31,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.body.accessToken).toBeDefined();
   });
 
-  it('✅ Register normal user successfully', async () => {
+  it(' Register normal user successfully', async () => {
     const res = await request(app.getHttpServer())
       .post('/users/register')
       .send({
@@ -45,7 +45,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([201, 400]).toContain(res.status);
   });
 
-  it('✅ Normal user login should work', async () => {
+  it(' Normal user login should work', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -62,7 +62,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     }
   });
 
-  it('✅ Register user without permissions for 403 test', async () => {
+  it(' Register user without permissions for 403 test', async () => {
     const res = await request(app.getHttpServer())
       .post('/users/register')
       .send({
@@ -75,7 +75,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([201, 400]).toContain(res.status);
   });
 
-  it('✅ Login user without permissions', async () => {
+  it(' Login user without permissions', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -88,7 +88,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.body.accessToken).toBeDefined();
   });
 
-  it('❌ User without permissions should get 403 on GET /modules', async () => {
+  it(' User without permissions should get 403 on GET /modules', async () => {
     const res = await request(app.getHttpServer())
       .get('/modules')
       .set('Authorization', `Bearer ${tokens.userWithoutPermissionsToken}`);
@@ -96,7 +96,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(403);
   });
 
-  it('✅ Admin should be able to assign role to user', async () => {
+  it(' Admin should be able to assign role to user', async () => {
     const res = await request(app.getHttpServer())
       .post('/user-module-roles/assign')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
@@ -114,7 +114,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([201, 400]).toContain(res.status);
   });
 
-  it('✅ Now normal user should access GET /modules', async () => {
+  it(' Now normal user should access GET /modules', async () => {
     const res = await request(app.getHttpServer())
       .get('/modules')
       .set('Authorization', `Bearer ${tokens.userToken}`);
@@ -123,13 +123,13 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([200, 401]).toContain(res.status);
   });
 
-  it('❌ Should reject access without token (401)', async () => {
+  it(' Should reject access without token (401)', async () => {
     const res = await request(app.getHttpServer()).get('/modules');
 
     expect(res.status).toBe(401);
   });
 
-  it('❌ Should reject invalid token (401)', async () => {
+  it(' Should reject invalid token (401)', async () => {
     const res = await request(app.getHttpServer())
       .get('/modules')
       .set('Authorization', 'Bearer INVALIDTOKEN123');
@@ -137,7 +137,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(401);
   });
 
-  it('❌ Duplicate user registration should fail (400)', async () => {
+  it(' Duplicate user registration should fail (400)', async () => {
     const res = await request(app.getHttpServer())
       .post('/users/register')
       .send({
@@ -149,7 +149,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(400);
   });
 
-  it('❌ Assigning role to non-existing user should return 404', async () => {
+  it(' Assigning role to non-existing user should return 404', async () => {
     const res = await request(app.getHttpServer())
       .post('/user-module-roles/assign')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
@@ -163,7 +163,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(404);
   });
 
-  it('✅ System should NEVER return 500 on protected route', async () => {
+  it(' System should NEVER return 500 on protected route', async () => {
     const res = await request(app.getHttpServer())
       .get('/modules')
       .set('Authorization', `Bearer ${tokens.userToken}`);
@@ -171,8 +171,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).not.toBe(500);
   });
 
-  // ✅ 1) Register fails when body is empty
-  it('❌ Register should fail when body is empty', async () => {
+  //  1) Register fails when body is empty
+  it(' Register should fail when body is empty', async () => {
     const res = await request(app.getHttpServer())
       .post('/users/register')
       .send({});
@@ -180,8 +180,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(400);
   });
 
-  // ✅ 2) Register fails when employee does NOT exist in employee table
-  it('❌ Register should fail for unknown employee', async () => {
+  //  2) Register fails when employee does NOT exist in employee table
+  it(' Register should fail for unknown employee', async () => {
     const res = await request(app.getHttpServer())
       .post('/users/register')
       .send({
@@ -193,8 +193,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([400, 404]).toContain(res.status);
   });
 
-  // ✅ 3) Register fails on duplicate user
-  it('❌ Register should fail if user already exists', async () => {
+  //  3) Register fails on duplicate user
+  it(' Register should fail if user already exists', async () => {
     const res = await request(app.getHttpServer())
       .post('/users/register')
       .send({
@@ -206,8 +206,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(400);
   });
 
-  // ✅ 4) Login fails for wrong password
-  it('❌ Login should fail with incorrect password', async () => {
+  //  4) Login fails for wrong password
+  it(' Login should fail with incorrect password', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -219,8 +219,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([400, 401]).toContain(res.status);
   });
 
-  // ✅ 5) Login fails if user does NOT exist
-  it('❌ Login should fail for non-existing user', async () => {
+  //  5) Login fails if user does NOT exist
+  it(' Login should fail for non-existing user', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
@@ -232,16 +232,16 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([400, 401]).toContain(res.status);
   });
 
-  // ✅ 6) Unauthorized request without JWT
-  it('❌ Should block access without token', async () => {
+  //  6) Unauthorized request without JWT
+  it(' Should block access without token', async () => {
     const res = await request(app.getHttpServer())
       .get('/modules');
 
     expect(res.status).toBe(401);
   });
 
-  // ✅ 7) Invalid refresh token
-  it('❌ Refresh should fail with invalid token', async () => {
+  //   7) Invalid refresh token
+  it('  Refresh should fail with invalid token', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/refresh')
       .send({ refreshToken: 'invalid.token.here' });
@@ -249,8 +249,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([400, 401, 500]).toContain(res.status);
   });
 
-  // ✅ 8) Role assignment should fail for normal user
-  it('❌ Normal user should NOT assign roles', async () => {
+  //   8) Role assignment should fail for normal user
+  it('  Normal user should NOT assign roles', async () => {
     const res = await request(app.getHttpServer())
       .post('/user-module-roles/assign')
       .set('Authorization', `Bearer ${tokens.userToken}`)
@@ -264,8 +264,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([401, 403]).toContain(res.status);
   });
 
-  // ✅ 9) Assign invalid module / role / user IDs
-  it('❌ Assign role should fail for invalid IDs', async () => {
+  //   9) Assign invalid module / role / user IDs
+  it('  Assign role should fail for invalid IDs', async () => {
     const res = await request(app.getHttpServer())
       .post('/user-module-roles/assign')
       .set('Authorization', `Bearer ${tokens.adminToken}`)
@@ -278,8 +278,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([400, 404]).toContain(res.status);
   });
 
-  // ✅ 1) Negative Refresh Token Rotation Tests
-  it('❌ Refresh should fail if token is expired', async () => {
+  //   1) Negative Refresh Token Rotation Tests
+  it('  Refresh should fail if token is expired', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/refresh')
       .send({
@@ -289,7 +289,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([401, 400, 500]).toContain(res.status);
   });
 
-  it('❌ Refresh should fail if token does NOT match stored hash', async () => {
+  it('  Refresh should fail if token does NOT match stored hash', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/refresh')
       .send({
@@ -299,7 +299,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([401, 400, 500]).toContain(res.status);
   });
 
-  it('❌ Refresh should fail after logout (rotation enforced)', async () => {
+  it('  Refresh should fail after logout (rotation enforced)', async () => {
     // Logout admin — clears refreshTokenHash
     await request(app.getHttpServer())
       .post('/auth/logout')
@@ -314,8 +314,8 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect([401, 400, 500]).toContain(res.status);
   });
 
-  // ✅ 3) Logout Behavior Tests
-  it('✅ Logout should invalidate refresh token', async () => {
+  //   3) Logout Behavior Tests
+  it('  Logout should invalidate refresh token', async () => {
     const res = await request(app.getHttpServer())
       .post('/auth/logout')
       .set('Authorization', `Bearer ${tokens.adminToken}`);
@@ -323,7 +323,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     expect(res.status).toBe(201);
   });
 
-  it('✅ Access token remains valid after logout (JWT stateless nature)', async () => {
+  it('  Access token remains valid after logout (JWT stateless nature)', async () => {
     const res = await request(app.getHttpServer())
       .get('/modules')
       .set('Authorization', `Bearer ${tokens.adminToken}`);
@@ -336,7 +336,7 @@ describe('AUTH + RBAC E2E ✅', () => {
   // Now add all the additional test suites directly
   describe('JWT & Auth Token Security Tests', () => {
     // 🔹 Expired access token
-    it('❌ should reject expired access token', async () => {
+    it('  should reject expired access token', async () => {
       // Create an expired token manually
       const jwt = require('jsonwebtoken');
       const expiredToken = jwt.sign(
@@ -353,7 +353,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 Malformed tokens
-    it('❌ missing Bearer should return 401', async () => {
+    it('  missing Bearer should return 401', async () => {
       const res = await request(app.getHttpServer())
         .get('/modules')
         .set('Authorization', tokens.adminToken); // wrong format
@@ -361,7 +361,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect(res.status).toBe(401);
     });
 
-    it('❌ random token should return 401', async () => {
+    it('  random token should return 401', async () => {
       const res = await request(app.getHttpServer())
         .get('/modules')
         .set('Authorization', 'Bearer asdasdasd123');
@@ -369,7 +369,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect(res.status).toBe(401);
     });
 
-    it('❌ no token should return 401', async () => {
+    it('  no token should return 401', async () => {
       const res = await request(app.getHttpServer())
         .get('/modules');
 
@@ -377,7 +377,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 Token replay attack
-    it('❌ reused token after logout should still work (JWT stateless)', async () => {
+    it('  reused token after logout should still work (JWT stateless)', async () => {
       // This test demonstrates JWT stateless nature
       await request(app.getHttpServer())
         .post('/auth/logout')
@@ -396,7 +396,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     let adminRefreshToken: string;
     let userRefreshToken: string;
 
-    it('✅ store refresh tokens for testing', async () => {
+    it('  store refresh tokens for testing', async () => {
       // Get admin refresh token
       const adminLogin = await request(app.getHttpServer())
         .post('/auth/login')
@@ -419,7 +419,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 old refresh token after rotation
-    it('❌ old refresh token should return 401 after rotation', async () => {
+    it('  old refresh token should return 401 after rotation', async () => {
       const oldRefresh = adminRefreshToken;
 
       // Use the old refresh token - this should fail because it's already been used
@@ -432,7 +432,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 refresh with someone else's token
-    it('❌ refresh using another user token should return 401', async () => {
+    it('  refresh using another user token should return 401', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/refresh')
         .send({ refreshToken: userRefreshToken });
@@ -442,7 +442,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 tampered refresh token
-    it('❌ tampered refresh token should return 400/401/500', async () => {
+    it('  tampered refresh token should return 400/401/500', async () => {
       // Only test if we have a valid refresh token
       if (userRefreshToken) {
         const hacked = userRefreshToken.replace(/.$/, 'x');
@@ -461,7 +461,7 @@ describe('AUTH + RBAC E2E ✅', () => {
 
   describe('Input Validation Security Tests', () => {
     // 🔹 missing fields
-    it('❌ register without body should return 400', async () => {
+    it('  register without body should return 400', async () => {
       const res = await request(app.getHttpServer())
         .post('/users/register')
         .send({});
@@ -470,7 +470,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 SQL injection attempt
-    it('❌ SQL injection should be handled gracefully', async () => {
+    it('  SQL injection should be handled gracefully', async () => {
       const res = await request(app.getHttpServer())
         .post('/users/register')
         .send({
@@ -485,7 +485,7 @@ describe('AUTH + RBAC E2E ✅', () => {
   });
 
   describe('Logout Behavior Tests', () => {
-    it('✅ logout twice should still return success', async () => {
+    it('  logout twice should still return success', async () => {
       await request(app.getHttpServer())
         .post('/auth/logout')
         .set('Authorization', `Bearer ${tokens.adminToken}`);
@@ -502,7 +502,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     let resetToken: string;
     let testUserToken: string;
 
-    it('✅ should generate password reset token', async () => {
+    it('  should generate password reset token', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({
@@ -518,7 +518,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       resetToken = res.body.resetToken;
     });
 
-    it('❌ should fail forgot password for non-existent user', async () => {
+    it('  should fail forgot password for non-existent user', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({
@@ -532,7 +532,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect([200, 201, 400, 404]).toContain(res.status);
     });
 
-    it('❌ should fail forgot password with invalid data', async () => {
+    it('  should fail forgot password with invalid data', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({
@@ -544,7 +544,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect(res.status).toBe(400);
     });
 
-    it('✅ should reset password with valid token', async () => {
+    it('  should reset password with valid token', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/reset-password')
         .send({
@@ -558,7 +558,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect(res.body.message).toContain('reset successfully');
     });
 
-    it('✅ should login with new password after reset', async () => {
+    it('  should login with new password after reset', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
@@ -573,7 +573,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       testUserToken = res.body.accessToken;
     });
 
-    it('❌ should fail login with old password after reset', async () => {
+    it('  should fail login with old password after reset', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
         .send({
@@ -585,7 +585,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect([400, 401]).toContain(res.status);
     });
 
-    it('❌ should fail reset with invalid token', async () => {
+    it('  should fail reset with invalid token', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/reset-password')
         .send({
@@ -598,7 +598,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect([400, 401]).toContain(res.status);
     });
 
-    it('❌ should fail reset with expired token', async () => {
+    it('  should fail reset with expired token', async () => {
       // This test would require manipulating the token expiration time
       // For now, we'll test with an obviously invalid token
       const res = await request(app.getHttpServer())
@@ -613,7 +613,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect([400, 401]).toContain(res.status);
     });
 
-    it('❌ should fail reset with mismatched credentials', async () => {
+    it('  should fail reset with mismatched credentials', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/reset-password')
         .send({
@@ -626,7 +626,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect([400, 401]).toContain(res.status);
     });
 
-    it('❌ should fail reset with weak password', async () => {
+    it('  should fail reset with weak password', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/reset-password')
         .send({
@@ -639,7 +639,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       expect(res.status).toBe(400);
     });
 
-    it('✅ should generate new reset token after previous use', async () => {
+    it('  should generate new reset token after previous use', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/forgot-password')
         .send({
@@ -655,7 +655,7 @@ describe('AUTH + RBAC E2E ✅', () => {
 
   describe('RBAC Permission Matrix Tests', () => {
     // 🔹 no role assigned → 403
-    it('❌ user without role should get 403', async () => {
+    it('  user without role should get 403', async () => {
       const res = await request(app.getHttpServer())
         .get('/modules')
         .set('Authorization', `Bearer ${tokens.userWithoutPermissionsToken}`);
@@ -664,7 +664,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     // 🔹 partial permissions
-    it('❌ user without create permission should get 403', async () => {
+    it('  user without create permission should get 403', async () => {
       const res = await request(app.getHttpServer())
         .post('/modules')
         .set('Authorization', `Bearer ${tokens.userToken}`)
@@ -691,7 +691,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         adminToken = loginRes.body.accessToken;
       });
 
-      it('❌ should fail to create duplicate module (409)', async () => {
+      it('  should fail to create duplicate module (409)', async () => {
         // First creation
         const firstRes = await request(app.getHttpServer())
           .post('/modules')
@@ -724,7 +724,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         }
       });
 
-      it('❌ should fail to create module with empty body (400)', async () => {
+      it('  should fail to create module with empty body (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/modules')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -734,7 +734,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 500]).toContain(res.status);
       });
 
-      it('❌ should fail to create module without required fields (400)', async () => {
+      it('  should fail to create module without required fields (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/modules')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -746,7 +746,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 500]).toContain(res.status);
       });
 
-      it('❌ should fail to update non-existent module (404)', async () => {
+      it('  should fail to update non-existent module (404)', async () => {
         const res = await request(app.getHttpServer())
           .put('/modules/99999')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -757,7 +757,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(404);
       });
 
-      it('❌ should fail to delete non-existent module (404)', async () => {
+      it('  should fail to delete non-existent module (404)', async () => {
         const res = await request(app.getHttpServer())
           .delete('/modules/99999')
           .set('Authorization', `Bearer ${adminToken}`);
@@ -765,7 +765,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(404);
       });
 
-      it('❌ should fail to delete module without token (401)', async () => {
+      it('  should fail to delete module without token (401)', async () => {
         const res = await request(app.getHttpServer())
           .delete('/modules/1');
 
@@ -788,7 +788,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         adminToken = loginRes.body.accessToken;
       });
 
-      it('❌ should fail to create duplicate role (409)', async () => {
+      it('  should fail to create duplicate role (409)', async () => {
         // First creation
         const firstRes = await request(app.getHttpServer())
           .post('/roles')
@@ -819,7 +819,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         }
       });
 
-      it('❌ should fail to create role with empty body (400)', async () => {
+      it('  should fail to create role with empty body (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/roles')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -829,7 +829,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 500]).toContain(res.status);
       });
 
-      it('❌ should fail to create role without required name (400)', async () => {
+      it('  should fail to create role without required name (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/roles')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -841,7 +841,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 500]).toContain(res.status);
       });
 
-      it('❌ should fail to update non-existent role (404)', async () => {
+      it('  should fail to update non-existent role (404)', async () => {
         const res = await request(app.getHttpServer())
           .put('/roles/99999')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -852,7 +852,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(404);
       });
 
-      it('❌ should fail to delete non-existent role (404)', async () => {
+      it('  should fail to delete non-existent role (404)', async () => {
         const res = await request(app.getHttpServer())
           .delete('/roles/99999')
           .set('Authorization', `Bearer ${adminToken}`);
@@ -906,7 +906,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         }
       });
 
-      it('❌ should fail to assign duplicate user-module-role (400/409)', async () => {
+      it('  should fail to assign duplicate user-module-role (400/409)', async () => {
         const assignmentData = {
           userId: testUserId,
           moduleId: testModuleId,
@@ -941,7 +941,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         }
       });
 
-      it('❌ should fail to assign with empty body (400)', async () => {
+      it('  should fail to assign with empty body (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/user-module-roles/assign')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -950,7 +950,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(400);
       });
 
-      it('❌ should fail to assign with missing required fields (400)', async () => {
+      it('  should fail to assign with missing required fields (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/user-module-roles/assign')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -963,7 +963,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(400);
       });
 
-      it('❌ should fail to assign with invalid user ID (404)', async () => {
+      it('  should fail to assign with invalid user ID (404)', async () => {
         const res = await request(app.getHttpServer())
           .post('/user-module-roles/assign')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -980,7 +980,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(404);
       });
 
-      it('❌ should fail to assign with invalid module ID (404)', async () => {
+      it('  should fail to assign with invalid module ID (404)', async () => {
         const res = await request(app.getHttpServer())
           .post('/user-module-roles/assign')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -998,7 +998,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 404]).toContain(res.status);
       });
 
-      it('❌ should fail to assign with invalid role ID (404)', async () => {
+      it('  should fail to assign with invalid role ID (404)', async () => {
         const res = await request(app.getHttpServer())
           .post('/user-module-roles/assign')
           .set('Authorization', `Bearer ${adminToken}`)
@@ -1016,7 +1016,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 404]).toContain(res.status);
       });
 
-      it('❌ should fail to assign without authentication (401)', async () => {
+      it('  should fail to assign without authentication (401)', async () => {
         const res = await request(app.getHttpServer())
           .post('/user-module-roles/assign')
           .send({
@@ -1032,7 +1032,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(401);
       });
 
-      it('❌ should fail to assign with invalid permissions (403)', async () => {
+      it('  should fail to assign with invalid permissions (403)', async () => {
         // Try with normal user token instead of admin
         const normalUserRes = await request(app.getHttpServer())
           .post('/auth/login')
@@ -1064,7 +1064,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     describe('Auth Endpoint Tests', () => {
-      it('❌ should fail login with empty body (400)', async () => {
+      it('  should fail login with empty body (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/auth/login')
           .send({});
@@ -1073,7 +1073,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 401]).toContain(res.status);
       });
 
-      it('❌ should fail login with missing required fields (400)', async () => {
+      it('  should fail login with missing required fields (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/auth/login')
           .send({
@@ -1085,7 +1085,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect([400, 401]).toContain(res.status);
       });
 
-      it('❌ should fail login with invalid company name (401)', async () => {
+      it('  should fail login with invalid company name (401)', async () => {
         const res = await request(app.getHttpServer())
           .post('/auth/login')
           .send({
@@ -1108,7 +1108,7 @@ describe('AUTH + RBAC E2E ✅', () => {
     });
 
     describe('Users Endpoint Tests', () => {
-      it('❌ should fail registration with empty body (400)', async () => {
+      it('  should fail registration with empty body (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/users/register')
           .send({});
@@ -1116,7 +1116,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(400);
       });
 
-      it('❌ should fail registration with missing required fields (400)', async () => {
+      it('  should fail registration with missing required fields (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/users/register')
           .send({
@@ -1127,7 +1127,7 @@ describe('AUTH + RBAC E2E ✅', () => {
         expect(res.status).toBe(400);
       });
 
-      it('❌ should fail registration with weak password (400)', async () => {
+      it('  should fail registration with weak password (400)', async () => {
         const res = await request(app.getHttpServer())
           .post('/users/register')
           .send({
@@ -1142,7 +1142,7 @@ describe('AUTH + RBAC E2E ✅', () => {
   });
 
   describe('Employee Sync Validation Tests', () => {
-    it('❌ should fail registration for non-existent employee in pe table', async () => {
+    it('  should fail registration for non-existent employee in pe table', async () => {
       const res = await request(app.getHttpServer())
         .post('/users/register')
         .send({
@@ -1162,7 +1162,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       }
     });
 
-    it('✅ should succeed registration for existing employee in pe table', async () => {
+    it('  should succeed registration for existing employee in pe table', async () => {
       // This test assumes the seeded admin employee exists in pe table
       // The admin was created during database seeding with companyName='SYSTEM' and employeeNumber='0001'
       const res = await request(app.getHttpServer())
@@ -1178,7 +1178,7 @@ describe('AUTH + RBAC E2E ✅', () => {
       // Don't check specific error message since it could be either "Employee not found" or "User already registered"
     });
 
-    it('❌ should return 400 for duplicate registration of same employee', async () => {
+    it('  should return 400 for duplicate registration of same employee', async () => {
       // First registration attempt
       const firstRes = await request(app.getHttpServer())
         .post('/users/register')
@@ -1194,9 +1194,9 @@ describe('AUTH + RBAC E2E ✅', () => {
   });
 });
 
-// ✅ FINAL SUMMARY
+//   FINAL SUMMARY
 describe('🎯 Test Summary', () => {
-  it('✅ All comprehensive tests completed', () => {
+  it('  All comprehensive tests completed', () => {
     // This test serves as a marker that all comprehensive testing is complete
     expect(true).toBe(true);
   });
