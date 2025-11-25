@@ -13,6 +13,7 @@ import { RolesModule } from './rbac/roles/roles.module';
 import { UserModuleRolesModule } from './rbac/user-module-roles/user-module-roles.module';
 import { DatabaseModule } from './database/database.module';
 import { SeederService } from './database/seeder.service';
+import { MdoModule } from './mdo/mdo.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SeederService } from './database/seeder.service';
     RolesModule,
     UserModuleRolesModule,
     DatabaseModule,
+    MdoModule,
   ],
 
   controllers: [AppController],
