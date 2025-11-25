@@ -1,15 +1,6 @@
-import { IsDateString, IsInt, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class UpdateHeaderDto {
-  @IsString()
-  @IsOptional()
-  @MaxLength(30)
-  bostamp?: string;
-
-  @IsInt()
-  @IsOptional()
-  userid?: number;
-
   @IsDateString()
   @IsOptional()
   data?: Date;

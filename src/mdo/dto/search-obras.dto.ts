@@ -15,4 +15,9 @@ export class SearchObrasDto {
   @IsOptional()
   @MaxLength(10)
   situacao?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(3000)
+  query?: string;
 }

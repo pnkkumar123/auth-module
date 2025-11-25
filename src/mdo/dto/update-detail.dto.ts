@@ -4,11 +4,6 @@ export class UpdateDetailDto {
   @IsString()
   @IsOptional()
   @MaxLength(30)
-  bistamp?: string;
-
-  @IsString()
-  @IsOptional()
-  @MaxLength(30)
   bostamp?: string;
 
   @IsString()
@@ -25,11 +20,6 @@ export class UpdateDetailDto {
   @IsOptional()
   @MaxLength(50)
   codviat?: string;
-
-  @IsString()
-  @IsOptional()
-  @MaxLength(255)
-  design?: string;
 
   @IsNumber()
   @IsOptional()

@@ -19,4 +19,11 @@ export class MapaDiarioObraHeader {
 
   @Column({ type: 'datetime', default: () => 'GETDATE()' })
   createdAt: Date;
+
+  @Column({ type: 'nvarchar', length: 100 })
+companyName: string;
+
+@Column({ type: 'nvarchar', length: 50 })
+employeeNumber: string;
+
 }

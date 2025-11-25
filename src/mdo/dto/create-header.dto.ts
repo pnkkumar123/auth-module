@@ -1,15 +1,6 @@
-import { IsDateString, IsInt, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class CreateHeaderDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(30)
-  bostamp: string;
-
-  @IsInt()
-  @IsNotEmpty()
-  userid: number;
-
   @IsDateString()
   @IsNotEmpty()
   data: Date;

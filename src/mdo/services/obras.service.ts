@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { Obra } from '../entities/obra.entity';
 import { CreateObraDto } from '../dto/create-obra.dto';
 import { SearchObrasDto } from '../dto/search-obras.dto';
@@ -13,22 +13,114 @@ export class ObrasService {
   ) {}
 
   async create(createObraDto: CreateObraDto): Promise<Obra> {
-    return {} as Obra;
+    try {
+      const existingObra = await this.obraRepository.findOne({
+        where: { obra: createObraDto.obra }
+      });
+
+      if (existingObra) {
+        throw new BadRequestException(`Obra with code '${createObraDto.obra}' already exists`);
+      }
+
+      const obra = this.obraRepository.create(createObraDto);
+      return await this.obraRepository.save(obra);
+
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      throw new InternalServerErrorException('Failed to create obra: ' + error.message);
+    }
   }
 
   async findAll(searchObrasDto: SearchObrasDto): Promise<Obra[]> {
-    return [];
+    try {
+      const where: any = {};
+
+      if (searchObrasDto.obra) {
+        where.obra = Like(`%${searchObrasDto.obra}%`);
+      }
+
+      if (searchObrasDto.nome) {
+        where.nome = Like(`%${searchObrasDto.nome}%`);
+      }
+
+      if (searchObrasDto.situacao) {
+        where.situacao = searchObrasDto.situacao;
+      }
+
+      return await this.obraRepository.find({
+        where,
+        order: { obra: 'ASC' },
+      });
+
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch obras: ' + error.message);
+    }
   }
 
-  async findOne(id: string): Promise<Obra> {
-    return {} as Obra;
+  async findOne(obra: string): Promise<Obra> {
+    try {
+      const entity = await this.obraRepository.findOne({ where: { obra } });
+
+      if (!entity) {
+        throw new NotFoundException(`Obra with code '${obra}' not found`);
+      }
+
+      return entity;
+
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to fetch obra: ' + error.message);
+    }
   }
 
-  async update(id: string, createObraDto: CreateObraDto): Promise<Obra> {
-    return {} as Obra;
+  async update(obra: string, createObraDto: CreateObraDto): Promise<Obra> {
+    try {
+      await this.findOne(obra);
+
+      await this.obraRepository.update(obra, createObraDto);
+      return await this.findOne(obra);
+
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to update obra: ' + error.message);
+    }
   }
 
-  async remove(id: string): Promise<void> {
-    return Promise.resolve();
+  async remove(obra: string): Promise<void> {
+    try {
+      await this.findOne(obra);
+
+      const result = await this.obraRepository.delete(obra);
+      if (result.affected === 0) {
+        throw new NotFoundException(`Obra with code '${obra}' not found`);
+      }
+
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Failed to delete obra: ' + error.message);
+    }
+  }
+
+  async searchObras(searchObrasDto: SearchObrasDto): Promise<Obra[]> {
+    try {
+      const query = searchObrasDto.query ?? '';
+
+      return await this.obraRepository.find({
+        where: [
+          {
+            obra: Like(`%${query}%`),
+            situacao: Like('[3457]%'),
+          },
+          {
+            nome: Like(`%${query}%`),
+            situacao: Like('[3457]%'),
+          }
+        ],
+        order: { obra: 'ASC' },
+      });
+
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to search obras: ' + error.message);
+    }
   }
 }
