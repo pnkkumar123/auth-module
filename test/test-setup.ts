@@ -15,6 +15,7 @@ import { UserModuleRolesModule } from '../src/rbac/user-module-roles/user-module
 import { DatabaseModule } from '../src/database/database.module';
 import { MdoModule } from '../src/mdo/mdo.module';
 import { TestTokenGenerator } from './test-token-generator';
+import { MdoTestSeedService } from './mdo/mdo-test-seed.service';
 
 export interface TestTokens {
   adminToken: string;
@@ -28,6 +29,7 @@ export class TestSetup {
   private app: INestApplication;
   private tokens: TestTokens;
   private tokenGenerator: TestTokenGenerator;
+  private mdoTestSeedService: MdoTestSeedService;
 
   async setupApp(): Promise<INestApplication> {
     // Set test environment variables
@@ -75,12 +77,22 @@ export class TestSetup {
     // Initialize test token generator
     this.tokenGenerator = new TestTokenGenerator();
 
+    // Initialize MDO test seed service
+    this.mdoTestSeedService = new MdoTestSeedService(
+      this.app.get('ObraRepository'),
+      this.app.get('EquipamentoRepository'),
+      this.app.get('EmployeeEntityRepository')
+    );
+
     return this.app;
   }
 
   async setupTestData(): Promise<TestTokens> {
     const app = this.app;
     
+    // Seed MDO test data first (before creating tokens)
+    await this.mdoTestSeedService.seedMdoTestData();
+
     // Get users for token generation
     const usersRepo = this.app.get('UserEntityRepository');
     const adminUser = await usersRepo.findOne({ where: { companyName: 'SYSTEM', employeeNumber: '0001' } });
