@@ -19,7 +19,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { MapaDiarioObraHeader } from '../entities/header.entity';
 
 @ApiTags('MDO - Headers')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('mdo/headers')
 export class HeadersController {

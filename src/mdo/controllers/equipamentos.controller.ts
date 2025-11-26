@@ -7,7 +7,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Equipamento } from '../entities/equipamento.entity';
 
 @ApiTags('MDO - Autocomplete')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('mdo/equipamentos')
 export class EquipamentosController {

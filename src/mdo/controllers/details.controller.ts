@@ -18,7 +18,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { MapaDiarioObraDetail } from '../entities/detail.entity';
 
 @ApiTags('MDO - Details')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard) // ensure logged in + role logic
 @Controller('mdo/details')
 export class DetailsController {

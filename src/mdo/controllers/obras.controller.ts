@@ -7,7 +7,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Obra } from '../entities/obra.entity';
 
 @ApiTags('MDO - Autocomplete')
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('mdo/obras')
 export class ObrasController {

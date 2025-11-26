@@ -28,6 +28,9 @@ async function bootstrap() {
     .addTag('modules', 'Module management endpoints')
     .addTag('roles', 'Role management endpoints')
     .addTag('user-module-roles', 'User permission management endpoints')
+    .addTag('MDO - Headers', 'Mapa Diário Obra header management')
+    .addTag('MDO - Details', 'Mapa Diário Obra detail rows management')
+    .addTag('MDO - Autocomplete', 'Autocomplete endpoints for obras and equipamentos')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
