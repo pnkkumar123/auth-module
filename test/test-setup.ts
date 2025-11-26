@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { AppController } from '../src/app.controller';
 import { AppService } from '../src/app.service';
 import { UsersModule } from '../src/users/users.module';
@@ -12,6 +13,8 @@ import { ModulesModule } from '../src/rbac/modules/modules.module';
 import { RolesModule } from '../src/rbac/roles/roles.module';
 import { UserModuleRolesModule } from '../src/rbac/user-module-roles/user-module-roles.module';
 import { DatabaseModule } from '../src/database/database.module';
+import { MdoModule } from '../src/mdo/mdo.module';
+import { TestTokenGenerator } from './test-token-generator';
 
 export interface TestTokens {
   adminToken: string;
@@ -24,6 +27,7 @@ export interface TestTokens {
 export class TestSetup {
   private app: INestApplication;
   private tokens: TestTokens;
+  private tokenGenerator: TestTokenGenerator;
 
   async setupApp(): Promise<INestApplication> {
     // Set test environment variables
@@ -57,6 +61,7 @@ export class TestSetup {
         RolesModule,
         UserModuleRolesModule,
         DatabaseModule,
+        MdoModule,
       ],
       controllers: [AppController],
       providers: [AppService],
@@ -66,22 +71,24 @@ export class TestSetup {
     this.app.useGlobalPipes(new ValidationPipe());
     
     await this.app.init();
+
+    // Initialize test token generator
+    this.tokenGenerator = new TestTokenGenerator();
+
     return this.app;
   }
 
   async setupTestData(): Promise<TestTokens> {
     const app = this.app;
     
-    // Admin login
-    const adminRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        companyName: 'SYSTEM',
-        employeeNumber: '0001',
-        password: 'Admin@123',
-      });
+    // Get users for token generation
+    const usersRepo = this.app.get('UserEntityRepository');
+    const adminUser = await usersRepo.findOne({ where: { companyName: 'SYSTEM', employeeNumber: '0001' } });
+    const normalUser = await usersRepo.findOne({ where: { companyName: 'ABC', employeeNumber: '1234567' } });
+    const noPermUser = await usersRepo.findOne({ where: { companyName: 'XYZ', employeeNumber: '9999999' } });
 
-    const adminToken = adminRes.body.accessToken;
+    // Generate test tokens with MDO permissions
+    const adminToken = this.tokenGenerator.generateToken(adminUser, 'admin');
 
     // Register normal user
     await request(app.getHttpServer())
@@ -92,17 +99,9 @@ export class TestSetup {
         password: 'User@123',
       });
 
-    // Normal user login
-    const userRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        companyName: 'ABC',
-        employeeNumber: '1234567',
-        password: 'User@123',
-      });
-
-    const userToken = userRes.body.accessToken;
-    const userId = userRes.body.userId;
+    // Normal user token with MDO permissions
+    const userToken = this.tokenGenerator.generateToken(normalUser, 'test-user');
+    const userId = normalUser.id;
 
     // Register user without permissions
     await request(app.getHttpServer())
@@ -113,17 +112,9 @@ export class TestSetup {
         password: 'NoPerm@123',
       });
 
-    // Login user without permissions
-    const noPermRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({
-        companyName: 'XYZ',
-        employeeNumber: '9999999',
-        password: 'NoPerm@123',
-      });
-
-    const userWithoutPermissionsToken = noPermRes.body.accessToken;
-    const userWithoutPermissionsId = noPermRes.body.userId;
+    // User without MDO permissions
+    const userWithoutPermissionsToken = this.tokenGenerator.generateToken(noPermUser, 'no-permissions');
+    const userWithoutPermissionsId = noPermUser.id;
 
     this.tokens = {
       adminToken,

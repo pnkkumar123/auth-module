@@ -5,6 +5,7 @@ import { describeRolesEndpointTests } from './rbac/roles-endpoint.spec';
 import { describeUserModuleRolesEndpointTests } from './rbac/user-module-roles-endpoint.spec';
 import { describeAuthEndpointTests } from './auth/auth-endpoint.spec';
 import { describeUsersEndpointTests } from './users/users-endpoint.spec';
+import { describeMdoEndpointTests } from './mdo/mdo-endpoint.e2e-spec';
 
 export function describeComprehensiveEndpointTesting(app: INestApplication, tokens: TestTokens) {
   describe('🔍 Comprehensive Endpoint Testing', () => {
@@ -22,5 +23,8 @@ export function describeComprehensiveEndpointTesting(app: INestApplication, toke
 
     // ✅ USERS ENDPOINT TESTING
     describeUsersEndpointTests(app);
+
+    // ✅ MDO (MAPA DIÁRIO OBRA) ENDPOINT TESTING
+    describeMdoEndpointTests(app, tokens);
   });
 }
