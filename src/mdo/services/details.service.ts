@@ -257,4 +257,71 @@ export class DetailsService {
     await this.detailRepository.delete(bistamp);
     return { message: 'Detail deleted successfully' };
   }
+
+  // -----------------------------------------------------
+// IMPORT FROM DATE (copy details, qtt = 0)
+// -----------------------------------------------------
+async importFromDate(
+  targetBostamp: string,
+  sourceDate: string | Date,
+  user: UserContext,
+): Promise<number> {
+  try {
+    const targetHeader = await this.assertHeaderAccess(targetBostamp, user);
+    await this.ensureHeaderEditable(targetHeader, user);
+
+    const sourceDateObj =
+      typeof sourceDate === 'string' ? new Date(sourceDate) : sourceDate;
+
+    if (isNaN(sourceDateObj.getTime())) {
+      throw new BadRequestException('Invalid source date');
+    }
+
+    const sourceHeaders = await this.headerRepository.find({
+      where: { obra: targetHeader.obra, data: sourceDateObj },
+    });
+
+    if (!sourceHeaders.length) return 0;
+
+    let importedCount = 0;
+
+    for (const sh of sourceHeaders) {
+      const rows = await this.detailRepository.find({
+        where: { bostamp: sh.bostamp },
+      });
+
+      for (const r of rows) {
+        const newBistamp = generateBistamp();
+
+        // Remove PK and old bistamp safely
+        const { bistamp: _oldBistamp, ...rest } = r as any;
+        delete (rest as any).id; // safe even if ID doesn't exist
+
+        const clone = this.detailRepository.create({
+          ...rest,
+          bistamp: newBistamp,
+          bostamp: targetBostamp,
+          qtt: 0,
+        });
+
+        await this.detailRepository.save(clone);
+        importedCount++;
+      }
+    }
+
+    return importedCount;
+  } catch (error) {
+    if (
+      error instanceof BadRequestException ||
+      error instanceof ForbiddenException ||
+      error instanceof NotFoundException
+    )
+      throw error;
+
+    throw new InternalServerErrorException(
+      'Failed to import details: ' + error.message,
+    );
+  }
+}
+
 }

@@ -41,6 +41,15 @@ export class DetailsController {
     return this.detailsService.findOne(bistamp, req.user);
   }
 
+  @Post(':bostamp/import')
+async importFromDate(
+  @Param('bostamp') bostamp: string,
+  @Body('date') date: string,
+  @Req() req
+) {
+  return this.detailsService.importFromDate(bostamp, date, req.user);
+}
+
   /**
    * Find all details for a specific header (bostamp)
    * Must enforce:

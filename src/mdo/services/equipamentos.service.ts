@@ -56,4 +56,17 @@ export class EquipamentosService {
       throw new InternalServerErrorException('Failed to fetch equipamento: ' + error.message);
     }
   }
+
+ async search(query: string) {
+    const q = query ?? '';
+    return this.equipamentoRepository.find({
+      where: [
+        { codviat: Like(`%${q}%`), inactivo: 0 },
+        { desig: Like(`%${q}%`), inactivo: 0 },
+      ],
+      take: 10,
+      order: { codviat: 'ASC' },
+    });
+  }
+
 }

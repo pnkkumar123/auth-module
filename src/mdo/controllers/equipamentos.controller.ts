@@ -30,4 +30,10 @@ export class EquipamentosController {
   async findOne(@Param('codviat') codviat: string) {
     return this.equipamentosService.findOne(codviat);
   }
+
+ @Get('search')
+  async searchEquipamentos(@Query('q') q: string) {
+    return this.equipamentosService.search(q || '');
+  }
+
 }

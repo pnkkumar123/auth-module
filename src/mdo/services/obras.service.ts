@@ -123,4 +123,24 @@ export class ObrasService {
       throw new InternalServerErrorException('Failed to search obras: ' + error.message);
     }
   }
+
+  async search(query: string) {
+    const q = query ?? '';
+    return this.obraRepository.find({
+      where: [
+        { situacao: Like('3%'), obra: Like(`%${q}%`) },
+        { situacao: Like('4%'), obra: Like(`%${q}%`) },
+        { situacao: Like('5%'), obra: Like(`%${q}%`) },
+        { situacao: Like('7%'), obra: Like(`%${q}%`) },
+
+        { situacao: Like('3%'), nome: Like(`%${q}%`) },
+        { situacao: Like('4%'), nome: Like(`%${q}%`) },
+        { situacao: Like('5%'), nome: Like(`%${q}%`) },
+        { situacao: Like('7%'), nome: Like(`%${q}%`) },
+      ],
+      take: 10,
+      order: { obra: 'ASC' },
+    });
+  }
+
 }

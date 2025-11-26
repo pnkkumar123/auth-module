@@ -28,4 +28,10 @@ export class ObrasController {
   async findOne(@Param('obra') obra: string) {
     return this.obrasService.findOne(obra);
   }
+@Get('search')
+async searchObras(@Query('q') q: string) {
+  return this.obrasService.search(q);
 }
+
+}
+
